@@ -9,9 +9,21 @@ from fastapi import FastAPI, UploadFile, File
 import uvicorn
 from fastapi.responses import HTMLResponse
 import pandas as pd
+from fastapi.middleware.cors import CORSMiddleware
+
 
 # Подключаем наше математическое ядро из соседнего файла (Соблюдаем SOLID)
 from engine import TelemetryEngine
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Разрешает запросы со всех серверов, включая Telegram
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 STORAGE_DIR = "./storage/telemetry"
