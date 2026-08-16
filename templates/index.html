@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartDrag Telemetry — Mission Control</title>
+    <title>SmartDrag Telemetry — Advanced Mission Control</title>
     <style>
-        /* Премиальные стили Формулы-1, встроенные прямо в файл */
         body {
             background-color: #020617;
             color: #f8fafc;
@@ -14,7 +13,7 @@
             padding: 16px;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
         header {
@@ -27,7 +26,7 @@
         }
         h1 {
             color: #ef4444;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 900;
             letter-spacing: 1px;
             margin: 0;
@@ -39,6 +38,7 @@
             margin: 4px 0 0 0;
             font-weight: bold;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .badge {
             background-color: #450a0a;
@@ -49,21 +49,22 @@
             border-radius: 9999px;
             border: 1px solid #991b1b;
         }
-        .grid {
+        
+        /* Сетка основных метрик */
+        .grid-metrics {
             display: grid;
             grid-template-cols: repeat(2, 1fr);
             gap: 12px;
             margin-bottom: 24px;
         }
         @media (min-width: 600px) {
-            .grid { grid-template-cols: repeat(4, 1fr); }
+            .grid-metrics { grid-template-cols: repeat(4, 1fr); }
         }
         .card {
             background-color: #0f172a;
             border: 1px solid #1e293b;
             padding: 16px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .card-title {
             font-size: 11px;
@@ -73,7 +74,7 @@
             margin: 0;
         }
         .card-value {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 900;
             margin: 8px 0 0 0;
         }
@@ -82,19 +83,37 @@
             color: #64748b;
             font-weight: normal;
         }
-        .chart-container {
+
+        /* Двухколоночный макет для продвинутых графиков */
+        .main-layout {
+            display: grid;
+            grid-template-cols: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (min-width: 768px) {
+            .main-layout { grid-template-cols: 2fr 1fr; }
+        }
+
+        .panel {
             background-color: #0f172a;
             border: 1px solid #1e293b;
-            padding: 16px;
+            padding: 20px;
             border-radius: 16px;
         }
-        .chart-header {
+        .panel-header {
             font-size: 13px;
             font-weight: bold;
             color: #cbd5e1;
             text-transform: uppercase;
             margin-bottom: 16px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+
+        /* SVG Линейный График */
         .f1-chart {
             width: 100%;
             height: auto;
@@ -105,11 +124,45 @@
         .grid-line { stroke: #0f172a; stroke-width: 1; stroke-dasharray: 4; }
         .speed-path { fill: none; stroke: #38bdf8; stroke-width: 3; stroke-linecap: round; }
         .drag-path { fill: rgba(239, 68, 68, 0.15); stroke: #ef4444; stroke-width: 3; stroke-linecap: round; }
+        
+        /* Виджет G-Force (Мишень перегрузок) */
+        .g-force-widget {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .g-circle { fill: none; stroke: #1e293b; stroke-width: 1.5; }
+        .g-cross { stroke: #1e293b; stroke-width: 1; stroke-dasharray: 2; }
+        .g-dot { fill: #22d3ee; filter: drop-shadow(0 0 6px #22d3ee); }
+        .g-text { fill: #64748b; font-size: 10px; font-weight: bold; }
+
+        /* Таблица секторов тайминга */
+        .sector-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+        .sector-table th {
+            text-align: left;
+            color: #64748b;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+        .sector-table td {
+            padding: 10px 0;
+            border-bottom: 1px solid #1e293b;
+        }
+        .purple-text { color: #a855f7; font-weight: bold; } /* Лучший сектор в F1 */
+        .green-text { color: #22c55e; font-weight: bold; }
+
         .legend {
             display: flex;
             gap: 16px;
             margin-top: 12px;
-            font-size: 12px;
+            font-size: 11px;
         }
         .legend-item { display: flex; align-items: center; gap: 6px; color: #94a3b8; }
         .dot-speed { width: 10px; height: 10px; background-color: #38bdf8; border-radius: 50%; }
@@ -118,17 +171,18 @@
 </head>
 <body>
     <div class="container">
-        <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+        
+        <!-- НАЗВАНИЕ СИСТЕМЫ -->
         <header>
             <div>
-                <h1>SmartDrag Telemetry</h1>
-                <p class="subtitle">🏎 Цифровой двойник гидроаэродинамики карта</p>
+                <h1>SmartDrag Mission Control</h1>
+                <p class="subtitle">📊 Ультимативный комплекс телеметрического анализа класса PRO</p>
             </div>
-            <div class="badge">F1 LIVE MODE</div>
+            <div class="badge">📡 ADVANCED TELEMETRY</div>
         </header>
 
-        <!-- СЕТКА МЕТРИК -->
-        <div class="grid">
+        <!-- ПАНЕЛЬ ОСНОВНЫХ КАРТОЧЕК -->
+        <div class="grid-metrics">
             <div class="card">
                 <p class="card-title">Пиковая скорость</p>
                 <p class="card-value" style="color: #38bdf8;">86.2 <span class="card-unit">км/ч</span></p>
@@ -138,39 +192,74 @@
                 <p class="card-value" style="color: #ef4444;">104.7 <span class="card-unit">Н</span></p>
             </div>
             <div class="card">
-                <p class="card-title">Потеря мощности</p>
+                <p class="card-title">Потери мощности</p>
                 <p class="card-value" style="color: #f97316;">1.18 <span class="card-unit">л.с.</span></p>
             </div>
             <div class="card">
-                <p class="card-title">Боковая перегрузка</p>
-                <p class="card-value" style="color: #22d3ee;">1.45 <span class="card-unit">G</span></p>
+                <p class="card-title">Прижимная сила Aero</p>
+                <p class="card-value" style="color: #a855f7;">14.2 <span class="card-unit">кг</span></p>
             </div>
         </div>
 
-        <!-- КАНВАС ГРАФИКА (НАПРАВЛЕННЫЙ ВЕКТОРНЫЙ SVG) -->
-        <div class="chart-container">
-            <div class="chart-header">📈 Линейный анализ набегающего потока (Скорость / Торможение)</div>
+        <!-- ГЛАВНЫЙ КОМПЛЕКС ГРАФИКОВ -->
+        <div class="main-layout">
             
-            <svg viewBox="0 0 500 200" class="f1-chart">
-                <!-- Оси и сетка -->
-                <line x1="40" y1="20" x2="40" y2="170" class="axis-line" />
-                <line x1="40" y1="170" x2="480" y2="170" class="axis-line" />
-                <line x1="40" y1="70" x2="480" y2="70" class="grid-line" />
-                <line x1="40" y1="120" x2="480" y2="120" class="grid-line" />
-                
-                <!-- Аэродинамическое сопротивление (Красная гоночная волна) -->
-                <path d="M 40 170 Q 120 40, 200 130 T 360 60 T 480 170 L 480 170 L 40 170 Z" class="drag-path" />
-                
-                <!-- Скорость по GPS (Неоновая синяя линия) -->
-                <path d="M 40 150 Q 120 30, 200 110 T 360 40 T 480 160" class="speed-path" />
-            </svg>
+            <!-- Левая колонка: Линейный график потоков -->
+            <div class="panel">
+                <div class="panel-header">📉 Линейный анализ набегающего потока (Частота 10 Гц)</div>
+                <svg viewBox="0 0 500 220" class="f1-chart">
+                    <line x1="40" y1="20" x2="40" y2="190" class="axis-line" />
+                    <line x1="40" y1="190" x2="480" y2="190" class="axis-line" />
+                    <line x1="40" y1="75" x2="480" y2="75" class="grid-line" />
+                    <line x1="40" y1="135" x2="480" y2="135" class="grid-line" />
+                    
+                    <!-- Кривая лобового сопротивления -->
+                    <path d="M 40 190 Q 120 50, 200 150 T 360 70 T 480 190 L 480 190 L 40 190 Z" class="drag-path" />
+                    <!-- Кривая скорости по GPS -->
+                    <path d="M 40 170 Q 120 40, 200 120 T 360 50 T 480 180" class="speed-path" />
+                </svg>
+                <div class="legend">
+                    <div class="legend-item"><div class="dot-speed"></div> Истинная скорость (GPS)</div>
+                    <div class="legend-item"><div class="dot-drag"></div> Аэродинамический Drag (Ньютоны)</div>
+                </div>
+            </div>
 
-            <div class="legend">
-                <div class="legend-item"><div class="dot-speed"></div> Скорость болида (GPS)</div>
-                <div class="legend-item"><div class="dot-drag"></div> Сила сопротивления воздуха (Ньютоны)</div>
+            <!-- Правая колонка: Круговая диаграмма G-Force -->
+            <div class="panel g-force-widget">
+                <div class="panel-header">⚡️ Радар перегрузок G-Force</div>
+                <svg width="160" height="160" viewBox="0 0 160 160">
+                    <!-- Мишень мишени перегрузок -->
+                    <circle cx="80" cy="80" r="70" class="g-circle" />
+                    <circle cx="80" cy="80" r="45" class="g-circle" />
+                    <circle cx="80" cy="80" r="20" class="g-circle" />
+                    <line x1="10" y1="80" x2="150" y2="80" class="g-cross" />
+                    <line x1="80" y1="10" x2="80" y2="150" class="g-cross" />
+                    
+                    <!-- Метки перегрузок -->
+                    <text x="83" y="25" class="g-text">1.5G</text>
+                    <text x="83" y="50" class="g-text">1.0G</text>
+                    
+                    <!-- Мгновенная пиковая точка заезда (Сдвинута в левый поворот) -->
+                    <circle cx="45" cy="55" r="5" class="g-dot" />
+                    
+                    <!-- Вектор направления ускорения -->
+                    <line x1="80" y1="80" x2="45" y2="55" stroke="#22d3ee" stroke-width="1.5" />
+                </svg>
+                <div style="font-size: 11px; color: #64748b; font-weight: bold; margin-top: 10px; text-align: center;">
+                    Макс. боковая нагрузка: <span style="color:#22d3ee;">1.45 G</span>
+                </div>
             </div>
         </div>
-    </div>
-</body>
-</html>
+
+        <!-- НОВЫЙ МОДУЛЬ: ТАЙМИНГ СЕКТОРОВ ТРЕКА -->
+        <div class="panel" style="margin-bottom: 24px;">
+            <div class="panel-header">⏱ Распределение динамики по секторам трассы</div>
+            <table class="sector-table">
+                <thead>
+                    <tr>
+                        <th>Сектор</th>
+                        <th>Длина секторов</th>
+                        <th>Макс. Перегрузка</th>
+                        <th>Время сектора</th>
+
 
