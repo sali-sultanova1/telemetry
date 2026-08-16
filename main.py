@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse  # <--- ДОБАВЬТЕ ЭТОТ И�
 # Подключаем наше математическое ядро из соседнего файла
 from engine import TelemetryEngine
 
-BOT_TOKEN = "8752928271:AAGjuTrVCVVlwE_Zqn99vf6bgNIm9PUrSkg"
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 STORAGE_DIR = "./storage/telemetry"
 
 # Создаем папку для безопасного хранения логов, если её нет
