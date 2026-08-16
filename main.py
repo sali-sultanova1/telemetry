@@ -22,95 +22,185 @@ app = FastAPI()
 
 @app.get("/dash", response_class=HTMLResponse)
 async def get_dashboard():
-    # Возвращаем весь HTML-код дашборда напрямую из памяти сервера, исключая сбои путей Linux
+    # Возвращаем монолитный, красивый гоночный интерфейс со встроенным CSS
     return """
     <!DOCTYPE html>
     <html lang="ru">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SmartDrag Telemetry - Mission Control</title>
-        <script src="https://jsdelivr.net"></script>
-        <script src="https://unpkg.com"></script>
-        <script src="https://jsdelivr.net"></script>
-        <script src="https://telegram.org"></script>
+        <title>SmartDrag Telemetry — Mission Control</title>
+        <style>
+            /* Профессиональные стили в стиле Формулы-1 */
+            body {
+                background-color: #020617;
+                color: #f8fafc;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                margin: 0;
+                padding: 16px;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            header {
+                border-b: 1px solid #1e293b;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding-bottom: 12px;
+                margin-bottom: 24px;
+                border-bottom: 2px solid #1e293b;
+            }
+            h1 {
+                color: #ef4444;
+                font-size: 24px;
+                font-weight: 900;
+                letter-spacing: 1px;
+                margin: 0;
+                text-transform: uppercase;
+            }
+            .subtitle {
+                font-size: 11px;
+                color: #94a3b8;
+                margin: 4px 0 0 0;
+                font-weight: bold;
+            }
+            .badge {
+                background-color: #450a0a;
+                color: #f87171;
+                font-size: 11px;
+                font-weight: bold;
+                padding: 6px 12px;
+                border-radius: 9999px;
+                border: 1px solid #991b1b;
+            }
+            .grid {
+                display: grid;
+                grid-template-cols: repeat(2, 1fr);
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            @media (min-width: 600px) {
+                .grid { grid-template-cols: repeat(4, 1fr); }
+            }
+            .card {
+                background-color: #0f172a;
+                border: 1px solid #1e293b;
+                padding: 16px;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+            .card-title {
+                font-size: 11px;
+                color: #94a3b8;
+                text-transform: uppercase;
+                font-weight: bold;
+                margin: 0;
+            }
+            .card-value {
+                font-size: 26px;
+                font-weight: 900;
+                margin: 8px 0 0 0;
+                color: #ffffff;
+            }
+            .card-unit {
+                font-size: 12px;
+                color: #64748b;
+                font-weight: normal;
+            }
+            .chart-container {
+                background-color: #0f172a;
+                border: 1px solid #1e293b;
+                padding: 16px;
+                border-radius: 16px;
+            }
+            .chart-header {
+                font-size: 13px;
+                font-weight: bold;
+                color: #cbd5e1;
+                text-transform: uppercase;
+                margin-bottom: 16px;
+            }
+            /* Стилизация SVG-графика высокого разрешения */
+            .f1-chart {
+                width: 100%;
+                height: auto;
+                background-color: #020617;
+                border-radius: 8px;
+            }
+            .axis-line { stroke: #1e293b; stroke-width: 2; }
+            .grid-line { stroke: #0f172a; stroke-width: 1; stroke-dasharray: 4; }
+            .speed-path { fill: none; stroke: #38bdf8; stroke-width: 3; stroke-linecap: round; }
+            .drag-path { fill: rgba(239, 68, 68, 0.15); stroke: #ef4444; stroke-width: 3; stroke-linecap: round; }
+            .legend {
+                display: flex;
+                gap: 16px;
+                margin-top: 12px;
+                font-size: 12px;
+            }
+            .legend-item { display: flex; align-items: center; gap: 6px; color: #94a3b8; }
+            .dot-speed { width: 10px; height: 10px; background-color: #38bdf8; border-radius: 50%; }
+            .dot-drag { width: 10px; height: 10px; background-color: #ef4444; border-radius: 50%; }
+        </style>
     </head>
-    <body class="bg-slate-950 text-slate-100 font-sans antialiased">
-        <div id="app" class="max-w-4xl mx-auto p-4">
-            <header class="border-b border-slate-800 pb-4 mb-6 flex justify-between items-center">
+    <body>
+        <div class="container">
+            <header>
                 <div>
-                    <h1 class="text-2xl font-black tracking-wider text-red-500 uppercase">SmartDrag Telemetry</h1>
-                    <p class="text-xs text-slate-400 mt-1">📊 СГЛАЖЕННЫЙ АНАЛИЗ ГИДРОАЭРОДИНАМИКИ БОЛИДА</p>
+                    <h1>SmartDrag Telemetry</h1>
+                    <p class="subtitle">🏎 МАТЕМАТИЧЕСКАЯ МОДЕЛЬ ГИДРОАЭРОДИНАМИКИ СЕССИИ</p>
                 </div>
-                <span class="px-3 py-1 bg-red-950 text-red-400 text-xs font-bold rounded-full border border-red-800 animate-pulse">
-                    F1 LIVE MODE
-                </span>
+                <div class="badge">F1 LIVE MODE</div>
             </header>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Пиковая скорость</p>
-                    <p class="text-2xl font-black text-white mt-1">86.2 <span class="text-xs text-slate-400">км/ч</span></p>
+            <div class="grid">
+                <div class="card">
+                    <p class="card-title">Пиковая скорость</p>
+                    <p class="card-value" style="color: #38bdf8;">86.2 <span class="card-unit">км/ч</span></p>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Лобовое сопротивление</p>
-                    <p class="text-2xl font-black text-red-400 mt-1">104.7 <span class="text-xs text-slate-400">Н</span></p>
+                <div class="card">
+                    <p class="card-title">Сопротивление воздуха</p>
+                    <p class="card-value" style="color: #ef4444;">104.7 <span class="card-unit">Н</span></p>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Потеря мощности</p>
-                    <p class="text-2xl font-black text-orange-400 mt-1">1.18 <span class="text-xs text-slate-400">л.с.</span></p>
+                <div class="card">
+                    <p class="card-title">Потеря мощности</p>
+                    <p class="card-value" style="color: #f97316;">1.18 <span class="card-unit">л.с.</span></p>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Боковая нагрузка</p>
-                    <p class="text-2xl font-black text-cyan-400 mt-1">1.45 <span class="text-xs text-slate-400">G</span></p>
+                <div class="card">
+                    <p class="card-title">Боковая перегрузка</p>
+                    <p class="card-value" style="color: #22d3ee;">1.45 <span class="card-unit">G</span></p>
                 </div>
             </div>
 
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-6">
-                <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wide mb-4">📈 Линейный анализ воздушных потоков и ускорения</h3>
-                <div class="relative h-64 w-full">
-                    <canvas id="telemetryChart"></canvas>
+            <div class="chart-container">
+                <div class="chart-header">📈 Линейный анализ набегающего потока (Скорость / Торможение)</div>
+                
+                <!-- Аппаратный рендеринг спортивного графика через векторную графику SVG -->
+                <svg viewBox="0 0 500 200" class="f1-chart">
+                    <!-- Сетки осей -->
+                    <line x1="40" y1="20" x2="40" y2="170" class="axis-line" />
+                    <line x1="40" y1="170" x2="480" y2="170" class="axis-line" />
+                    <line x1="40" y1="70" x2="480" y2="70" class="grid-line" />
+                    <line x1="40" y1="120" x2="480" y2="120" class="grid-line" />
+                    
+                    <!-- График Лобового Сопротивления (Красная гоночная волна с заливкой) -->
+                    <path d="M 40 170 Q 120 40, 200 130 T 360 60 T 480 170 L 480 170 L 40 170 Z" class="drag-path" />
+                    
+                    <!-- График Скорости Карта по GPS (Синяя спортивная линия) -->
+                    <path d="M 40 150 Q 120 30, 200 110 T 360 40 T 480 160" class="speed-path" />
+                </svg>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="dot-speed"></div> Скорость карта (GPS)</div>
+                    <div class="legend-item"><div class="dot-drag"></div> Сила сопротивления воздуха (Ньютоны)</div>
                 </div>
             </div>
         </div>
-
-        <script>
-            const { createApp, onMounted } = Vue;
-            createApp({
-                setup() {
-                    onMounted(() => {
-                        if (window.Telegram && window.Telegram.WebApp) {
-                            window.Telegram.WebApp.ready();
-                            window.Telegram.WebApp.expand();
-                        }
-                        const ctx = document.getElementById('telemetryChart').getContext('2d');
-                        const labels = Array.from({length: 45}, (_, i) => `${i}с`);
-                        const speedData = Array.from({length: 45}, (_, i) => 40 + Math.sin(i/3) * 30 + Math.random() * 2);
-                        const dragData = speedData.map(s => (s ** 2) * 0.015);
-
-                        new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: labels,
-                                datasets: [
-                                    { label: 'Скорость болида (км/ч)', data: speedData, borderColor: '#ffffff', borderWidth: 2, pointRadius: 0, tension: 0.3 },
-                                    { label: 'Сила сопротивления воздуха (Ньютоны)', data: dragData, borderColor: '#ef4444', borderWidth: 2, pointRadius: 0, tension: 0.3, backgroundColor: 'rgba(239, 68, 68, 0.1)', fill: true }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { labels: { color: '#94a3b8', font: { weight: 'bold' } } } },
-                                scales: { x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } }, y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } } }
-                            }
-                        });
-                    });
-                }
-            }).mount('#app');
-        </script>
     </body>
     </html>
     """
+
 
 
 
