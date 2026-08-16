@@ -10,7 +10,7 @@ import uvicorn
 from fastapi.responses import HTMLResponse
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi import Response
 
 # Подключаем наше математическое ядро из соседнего файла (Соблюдаем SOLID)
 from engine import TelemetryEngine
@@ -37,8 +37,11 @@ dp = Dispatcher()
 engine = TelemetryEngine() # Инициализируем наше гоночное ядро
 
 @app.get("/dash", response_class=HTMLResponse)
-async def get_dashboard():
-    # Профессиональный расчет путей: находим точную корневую папку нашего проекта в облаке
+async def get_dashboard(response: Response):
+    # Принудительно удаляем защитный замок хостинга, мешающий шторке Telegram
+    response.headers["X-Frame-Options"] = "ALLOWALL" 
+    response.headers["Content-Security-Policy"] = "frame-ancestors *"
+    
     base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, "templates", "index.html")
     with open(file_path, "r", encoding="utf-8") as f:
