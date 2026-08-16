@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartDrag Telemetry — Advanced Mission Control</title>
+    
+    <!-- КРИТИЧЕСКИ ВАЖНО ДЛЯ ТЕЛЕГРАМА: Без этой строки шторка всегда будет крутить кубики! -->
+    <script src="https://telegram.org"></script>
+    
+    <script>
+        // Инициализируем WebApp сразу при загрузке, чтобы Телеграм понял: приложение живое!
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand(); // Автоматически раскрываем шторку на весь экран
+        }
+    </script>
     <style>
         body {
             background-color: #020617;
