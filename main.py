@@ -50,8 +50,14 @@ async def handle_telemetry_file(message: types.Message):
     await bot.download_file(file_info.file_path, local_filepath)
 
     try:
-        # Передаем путь к файлу в математический движок
-        metrics = engine.analyze(local_filepath)
+        # Скачиваем файл напрямую в оперативную память сервера (Защита диска Render)
+        file_id = message.document.file_id
+        file_info = await bot.get_file(file_id)
+        file_bytes = await bot.download_file(file_info.file_path)
+        
+        # Читаем таблицу прямо из байтов памяти
+        df = pd.read_csv(io.BytesIO(file_bytes.read()))
+        metrics = clean_and_analyze(df)
         
         # Профессиональный спортивный отчет
         report = (
