@@ -16,6 +16,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from engine import TelemetryEngine
 
 
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+STORAGE_DIR = "./storage/telemetry"
+os.makedirs(STORAGE_DIR, exist_ok=True)
+
+app = FastAPI()
+bot = Bot(token=BOT_TOKEN)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Разрешает запросы со всех серверов, включая Telegram
@@ -24,13 +33,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-STORAGE_DIR = "./storage/telemetry"
-os.makedirs(STORAGE_DIR, exist_ok=True)
-
-app = FastAPI()
-bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 engine = TelemetryEngine() # Инициализируем наше гоночное ядро
 
