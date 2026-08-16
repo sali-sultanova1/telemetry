@@ -68,7 +68,7 @@ async def handle_telemetry_file(message: types.Message):
         )
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="📈 Открыть Дашборд Телеметрии (F1 Live)", web_app=WebAppInfo(url="https://icgxr-45-82-65-117.run.pinggy-free.link"))]
+            [InlineKeyboardButton(text="📈 Открыть Дашборд Телеметрии (F1 Live)", web_app=WebAppInfo(url="https://telemetry-r49l.onrender.com"))]
         ])
 
 
